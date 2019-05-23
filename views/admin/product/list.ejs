@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .header, .body, .footer {
+            padding: 10px;
+        }
+
+        .footer {
+            text-align: center;
+        }
+
+        .left-bar {
+            width: 30%;
+            float: left;
+        }
+
+        .main-content {
+            float: left;
+        }
+    </style>
+</head>
+<%
+var imageW = 150;
+var imageH = 150;
+%>
+<body>
+<div class="header">
+    <h1 id="product-heading">List Product</h1>
+    <a href="/admin/products/create">Create new</a>
+    <div>
+        <div>Press something and hit enter to search</div>
+        <div><input type="text" name="keyword" value="<%= keyword %>"></div>
+    </div>
+</div>
+<div class="body">
+    <div class="left-bar">
+        <div>Search by price</div>
+        <ul>
+            <li><a href="/admin/products/list?min=0&max=1000"><= 1000 VND</a></li>
+            <li><a href="/admin/products/list?min=1000&max=2000">1000 - 2000 VND</a></li>
+            <li><a href="/admin/products/list?min=2000&max=5000">2000 - 5000 VND</a></li>
+            <li><a href="/admin/products/list?min=5000&max=0">>= 5000 VND</a></li>
+        </ul>
+        <div>Search by category</div>
+        <ul>
+            <li>
+                <a href="/admin/products/list">All</a>
+            </li>
+            <%
+            for (var i = 0; i < categories.length; i++) {
+            %>
+                <li><a href="/admin/products/list?categoryId=<%=categories[i]._id%>"><%=categories[i].name%></a></li>
+            <%
+            }
+            %>
+
+        </ul>
+    </div>
+    <div class="main-content">
+        <ul>
+            <% for (var i = 0; i < listData.length; i++){ %>
+            <li class="data-item">
+        <span><img src="http://res.cloudinary.com/xuanhung2401/image/upload/c_pad,w_<%= imageW %>,h_<%= imageH %>/<%= listData[i].imageUrl %>"
+                   alt="<%= listData[i].name %>"></span>
+                <span><%= listData[i].name %></span>
+                <span>
+            <!--<a href="/admin/products/detail/<%= listData[i]._id %>">Detail</a>&nbsp;-->
+            <!--<a href="/admin/products/edit/<%= listData[i]._id %>">Edit</a>&nbsp;-->
+            <!--<a title="<%= listData[i]._id %>" class="btn-delete" href="#">Delete</a>&nbsp;-->
+                    <%= listData[i].price%> $
+        </span>
+                <span>
+                    <%
+                        if(listData[i].category){
+                    %>
+                        - Danh mục: <%= listData[i].category.name%>
+                    <%
+                        }
+                    %>
+                </span>
+            </li>
+            <% } %>
+        </ul>
+        <div>
+            <%
+            if(parseInt(page) > 1){
+            %>
+            <span>
+        <a href="/admin/products/list?page=<%= parseInt(page) - 1 %>&limit=<%= limit %>">
+            <%= parseInt(page) - 1 %></a>
+    </span>
+            <%
+            }
+            %>
+            <span><%= page %></span>
+            <%
+            if(parseInt(page) < parseInt(totalPage)){
+            %>
+            <span>
+        <a href="/admin/products/list?page=<%= parseInt(page) + 1 %>&limit=<%= limit %>">
+            <%= parseInt(page) + 1 %></a>
+    </span>
+            <%
+            }
+            %>
+        </div>
+    </div>
+</div>
+<div style="clear: both"></div>
+<div class="footer">
+    Copyright 2019
+</div>
+
+<script>
+    var deleteBaseUrl = '/admin/products/delete/';
+    var listBtnDelete = document.getElementsByClassName('btn-delete');
+    for (var i = 0; i < listBtnDelete.length; i++) {
+        listBtnDelete[i].onclick = function () {
+            var requestUrl = deleteBaseUrl + this.title;
+            if (confirm('Are you sure wanna delete this product?')) {
+                var xmlHttpRequest = new XMLHttpRequest();
+                xmlHttpRequest.onreadystatechange = function () {
+                    if (this.status == 200 && this.readyState == 4) {
+                        alert('Delete success');
+                        location.reload();
+                    }
+                };
+                xmlHttpRequest.open('POST', requestUrl, true);
+                xmlHttpRequest.send();
+            }
+            return false
+        }
+    }
+
+    var searchTextBox = document.querySelector('[name="keyword"]');
+    searchTextBox.onkeypress = function (key) {
+        if (key.keyCode == 13) {
+            var keyword = searchTextBox.value;
+            location.href = '/admin/products/list?keyword=' + keyword;
+        }
+    }
+</script>
+</body>
+</html>

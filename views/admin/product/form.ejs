@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<h1>Product Form</h1>
+
+<%
+if(typeof errors !== 'undefined' && errors.length > 0){
+for (var i = 0; i < errors.length; i++) {
+%>
+<div class="error"><%= errors[i].param %> - <%= errors[i].msg %></div>
+<%
+}
+}
+%>
+<a href="/admin/products/list">List Product</a>
+<form action="<%= action %>" method="post" id="product-form">
+    <div>
+        Name <input type="text" id="name" name="name" value="<%= obj.name %>">
+    </div>
+    <div>
+        Description <input type="text" name="description" value="<%= obj.description %>">
+    </div>
+    <div>
+        Detail <input type="text" name="detail" value="<%= obj.detail %>">
+    </div>
+    <div>
+        Price <input type="number" name="price" value="<%= obj.price %>">
+    </div>
+    <div>
+        Image <input type="file" name="image">
+        <input type="hidden" name="imageUrl">
+        <img src="" alt="" id="image-preview" style="width: 100px">
+    </div>
+    <div>
+        Category
+        <select name="categoryId">
+        <%
+            for(var i = 0; i < categories.length; i++){
+        %>
+            <option value="<%= categories[i]._id%>"><%= categories[i].name%></option>
+        <%
+            }
+        %>
+        </select>
+    </div>
+    <div>
+        <input type="submit" value="Submit">
+        <input type="reset" value="Reset">
+    </div>
+</form>
+<script src="/javascripts/jquery-1.11.1.js"></script>
+<script src="/javascripts/jquery.validate.min.js"></script>
+<script src="/javascripts/additional-methods.min.js"></script>
+
+<script>
+    const cloudName = 'xuanhung2401';
+    const unsignedUploadPreset = 'phlw547y';
+
+
+    $(document).ready(function () {
+        $('#product-form').validate(
+            {
+                rules: {
+                    name: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 20
+                    },
+                    price: 'required'
+                },
+                messages: {
+                    name: {
+                        required: 'Please enter product name!',
+                        minlength: 'Please enter name from 5 to 20 character',
+                        maxlength: 'Please enter name from 5 to 20 character',
+                        email: 'Invalid email'
+                    },
+                    price: 'Please enter price!'
+                }
+            }
+        );
+
+    });
+
+
+
+    var img = document.querySelector('[name="image"]');
+
+    img.onchange = function () {
+        var file = this.files[0];
+        var url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
+
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var responseDataJson = JSON.parse(this.responseText);
+                console.log(responseDataJson);
+                var imageUrl = document.querySelector('input[name="imageUrl"]');
+                imageUrl.value = responseDataJson.public_id;
+                document.getElementById('image-preview').src = responseDataJson.url;
+            }
+        }
+        xhr.open('POST', url, true);
+        var fd = new FormData();
+        fd.append('upload_preset', unsignedUploadPreset);
+        fd.append('tags', 'browser_upload');
+        fd.append('file', file);
+        xhr.send(fd);
+    }
+</script>
+</body>
+</html>
